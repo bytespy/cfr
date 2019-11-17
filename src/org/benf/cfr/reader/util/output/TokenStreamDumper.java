@@ -200,9 +200,12 @@ public class TokenStreamDumper extends AbstractDumper {
         if (inBlockComment != BlockCommentState.Not) {
             throw new IllegalStateException("Attempt to nest block comments.");
         }
+        if (inline) {
+            print("/* ");
+        } else {
+            print("/*").newln();
+        }
         inBlockComment = inline ? BlockCommentState.InLine : BlockCommentState.In;
-        print("/* ");
-        if (inline) newln();
         return this;
     }
 
@@ -292,7 +295,11 @@ public class TokenStreamDumper extends AbstractDumper {
     public Dumper newln() {
         if (pendingCR) sink(cr);
         pendingCR = true;
-        atStart = true;
+        if (inBlockComment != BlockCommentState.Not) {
+            comment(" * ");
+        } else {
+            atStart = true;
+        }
         outputCount++;
         return this;
     }
